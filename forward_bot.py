@@ -2,6 +2,7 @@ import asyncio
 import os
 from collections import defaultdict
 from telethon import TelegramClient
+from telethon.errors import MediaEmptyError
 from telethon.sessions import StringSession
 
 API_ID = int(os.environ["API_ID"])
@@ -44,7 +45,12 @@ async def send_messages(client, target, messages: list):
     # 单条消息
     for msg in singles:
         if msg.media:
-            await client.send_file(target, msg.media, caption=with_url(msg.message or ""))
+            try:
+                await client.send_file(target, msg.media, caption=with_url(msg.message or ""))
+            except MediaEmptyError:
+                print(f"跳过受保护媒体（消息 ID {msg.id}），仅发送文字。")
+                if msg.message:
+                    await client.send_message(target, with_url(msg.message))
         elif msg.message:
             await client.send_message(target, with_url(msg.message))
         await asyncio.sleep(1.5)
@@ -56,7 +62,12 @@ async def send_messages(client, target, messages: list):
         text_msg = next((m for m in reversed(group_msgs) if m.message), None)
         caption = with_url(text_msg.message if text_msg else "")
         if files:
-            await client.send_file(target, files, caption=caption)
+            try:
+                await client.send_file(target, files, caption=caption)
+            except MediaEmptyError:
+                print(f"跳过受保护相册，仅发送文字。")
+                if caption:
+                    await client.send_message(target, caption)
         await asyncio.sleep(1.5)
 
 
