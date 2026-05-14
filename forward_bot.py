@@ -67,7 +67,7 @@ async def main():
         # 先加载对话列表，确保实体缓存已初始化
         await client.get_dialogs()
         source = await client.get_entity(int(SOURCE_CHANNEL))
-        target = await client.get_entity(TARGET_CHANNEL)
+        target = await client.get_entity(int(TARGET_CHANNEL) if TARGET_CHANNEL.lstrip("-").isdigit() else TARGET_CHANNEL)
 
         # 首次运行：只记录当前最新消息 ID，不转发历史
         if last_id == 0:
