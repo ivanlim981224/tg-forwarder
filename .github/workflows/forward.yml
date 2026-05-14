@@ -1,0 +1,45 @@
+name: Telegram 消息转发
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # 每 5 分钟执行一次
+  workflow_dispatch:          # 允许手动触发
+
+jobs:
+  forward:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write         # 允许提交 last_message_id.txt
+
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 运行转发脚本
+        env:
+          API_ID: ${{ secrets.API_ID }}
+          API_HASH: ${{ secrets.API_HASH }}
+          TELETHON_SESSION: ${{ secrets.TELETHON_SESSION }}
+          SOURCE_CHANNEL: ${{ secrets.SOURCE_CHANNEL }}
+          TARGET_CHANNEL: ${{ secrets.TARGET_CHANNEL }}
+          CUSTOM_URL: ${{ secrets.CUSTOM_URL }}
+        run: python forward_bot.py
+
+      - name: 保存最新消息 ID
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add last_message_id.txt
+          git diff --staged --quiet || git commit -m "chore: update last message id"
+          git push
