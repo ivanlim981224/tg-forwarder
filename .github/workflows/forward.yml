@@ -5,6 +5,9 @@ on:
     - cron: "*/5 * * * *"   # 每 5 分钟执行一次
   workflow_dispatch:          # 允许手动触发
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   forward:
     runs-on: ubuntu-latest
