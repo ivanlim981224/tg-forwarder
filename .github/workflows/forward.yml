@@ -38,7 +38,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add last_id_1.txt
-          git diff --staged --quiet || git commit -m "chore: update last id 1" && git push
+          git diff --staged --quiet || (git commit -m "chore: update last id 1" && git pull --rebase && git push)
 
   # ===== 频道对 2 =====
   forward-2:
@@ -69,6 +69,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add last_id_2.txt
-          git diff --staged --quiet || git commit -m "chore: update last id 2" && git push
+          git diff --staged --quiet || (git commit -m "chore: update last id 2" && git pull --rebase && git push)
 
   # ===== 频道对 3（如需更多，复制上面这段，改数字）=====
