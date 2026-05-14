@@ -11,7 +11,7 @@ SOURCE_CHANNEL = os.environ["SOURCE_CHANNEL"]   # 源频道 ID，如 -1001234567
 TARGET_CHANNEL = os.environ["TARGET_CHANNEL"]   # 你的频道 ID 或 @username
 CUSTOM_URL = os.environ["CUSTOM_URL"]           # 你要附加的链接
 
-LAST_ID_FILE = "last_message_id.txt"
+LAST_ID_FILE = os.environ.get("LAST_ID_FILE", "last_message_id.txt")
 
 
 def read_last_id():

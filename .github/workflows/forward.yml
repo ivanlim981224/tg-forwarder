@@ -9,27 +9,21 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  forward:
+  # ===== 频道对 1（原有）=====
+  forward-1:
     runs-on: ubuntu-latest
     permissions:
-      contents: write         # 允许提交 last_message_id.txt
-
+      contents: write
     steps:
-      - name: 检出仓库
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 设置 Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
-
-      - name: 安装依赖
-        run: pip install -r requirements.txt
-
-      - name: 运行转发脚本
+      - run: pip install -r requirements.txt
+      - name: 运行转发
         env:
           API_ID: ${{ secrets.API_ID }}
           API_HASH: ${{ secrets.API_HASH }}
@@ -37,12 +31,44 @@ jobs:
           SOURCE_CHANNEL: ${{ secrets.SOURCE_CHANNEL }}
           TARGET_CHANNEL: ${{ secrets.TARGET_CHANNEL }}
           CUSTOM_URL: ${{ secrets.CUSTOM_URL }}
+          LAST_ID_FILE: last_id_1.txt
         run: python forward_bot.py
-
-      - name: 保存最新消息 ID
+      - name: 保存进度
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add last_message_id.txt
-          git diff --staged --quiet || git commit -m "chore: update last message id"
-          git push
+          git add last_id_1.txt
+          git diff --staged --quiet || git commit -m "chore: update last id 1" && git push
+
+  # ===== 频道对 2 =====
+  forward-2:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - run: pip install -r requirements.txt
+      - name: 运行转发
+        env:
+          API_ID: ${{ secrets.API_ID }}
+          API_HASH: ${{ secrets.API_HASH }}
+          TELETHON_SESSION: ${{ secrets.TELETHON_SESSION }}
+          SOURCE_CHANNEL: ${{ secrets.SOURCE_CHANNEL_2 }}
+          TARGET_CHANNEL: ${{ secrets.TARGET_CHANNEL_2 }}
+          CUSTOM_URL: ${{ secrets.CUSTOM_URL_2 }}
+          LAST_ID_FILE: last_id_2.txt
+        run: python forward_bot.py
+      - name: 保存进度
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add last_id_2.txt
+          git diff --staged --quiet || git commit -m "chore: update last id 2" && git push
+
+  # ===== 频道对 3（如需更多，复制上面这段，改数字）=====
