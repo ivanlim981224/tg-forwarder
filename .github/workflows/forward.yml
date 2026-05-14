@@ -71,4 +71,35 @@ jobs:
           git add last_id_2.txt
           git diff --staged --quiet || (git commit -m "chore: update last id 2" && git pull --rebase && git push)
 
-  # ===== 频道对 3（如需更多，复制上面这段，改数字）=====
+  # ===== 频道对 3 =====
+  forward-3:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - run: pip install -r requirements.txt
+      - name: 运行转发
+        env:
+          API_ID: ${{ secrets.API_ID }}
+          API_HASH: ${{ secrets.API_HASH }}
+          TELETHON_SESSION: ${{ secrets.TELETHON_SESSION }}
+          SOURCE_CHANNEL: ${{ secrets.SOURCE_CHANNEL_3 }}
+          TARGET_CHANNEL: ${{ secrets.TARGET_CHANNEL_3 }}
+          CUSTOM_URL: ${{ secrets.CUSTOM_URL_3 }}
+          LAST_ID_FILE: last_id_3.txt
+        run: python forward_bot.py
+      - name: 保存进度
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add last_id_3.txt
+          git diff --staged --quiet || (git commit -m "chore: update last id 3" && git pull --rebase && git push)
+
+  # ===== 如需更多频道，复制上面这段，改数字 =====
