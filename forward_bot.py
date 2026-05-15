@@ -1,6 +1,5 @@
 import asyncio
 import os
-import requests
 from collections import defaultdict
 from telethon import TelegramClient
 from telethon.errors import MediaEmptyError
@@ -14,7 +13,6 @@ TARGET_CHANNEL = os.environ["TARGET_CHANNEL"]   # 你的频道 ID 或 @username
 CUSTOM_URL = os.environ["CUSTOM_URL"]           # 你要附加的链接
 
 LAST_ID_FILE = os.environ.get("LAST_ID_FILE", "last_message_id.txt")
-MAKE_WEBHOOK_URL = os.environ.get("MAKE_WEBHOOK_URL", "")
 
 
 def read_last_id():
@@ -31,15 +29,6 @@ def write_last_id(msg_id: int):
 
 def with_url(text: str) -> str:
     return f"{text}\n\n{CUSTOM_URL}" if text else CUSTOM_URL
-
-
-def notify_make(text: str):
-    if not MAKE_WEBHOOK_URL:
-        return
-    try:
-        requests.post(MAKE_WEBHOOK_URL, json={"text": text}, timeout=10)
-    except Exception as e:
-        print(f"Make.com 通知失败（不影响 Telegram 转发）: {e}")
 
 
 async def send_messages(client, target, messages: list):
@@ -65,8 +54,6 @@ async def send_messages(client, target, messages: list):
                     await client.send_message(target, content)
         elif msg.message:
             await client.send_message(target, content)
-        if msg.message:
-            notify_make(content)
         await asyncio.sleep(1.5)
 
     # 相册（多图/多视频）

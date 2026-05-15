@@ -31,7 +31,6 @@ jobs:
           SOURCE_CHANNEL: ${{ secrets.SOURCE_CHANNEL }}
           TARGET_CHANNEL: ${{ secrets.TARGET_CHANNEL }}
           CUSTOM_URL: ${{ secrets.CUSTOM_URL }}
-          MAKE_WEBHOOK_URL: ${{ secrets.MAKE_WEBHOOK_URL }}
           LAST_ID_FILE: last_id_1.txt
         run: python forward_bot.py
       - name: 保存进度
@@ -66,7 +65,6 @@ jobs:
           SOURCE_CHANNEL: ${{ secrets.SOURCE_CHANNEL_2 }}
           TARGET_CHANNEL: ${{ secrets.TARGET_CHANNEL_2 }}
           CUSTOM_URL: ${{ secrets.CUSTOM_URL_2 }}
-          MAKE_WEBHOOK_URL: ${{ secrets.MAKE_WEBHOOK_URL }}
           LAST_ID_FILE: last_id_2.txt
         run: python forward_bot.py
       - name: 保存进度
