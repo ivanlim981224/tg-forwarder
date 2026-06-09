@@ -77,7 +77,7 @@ jobs:
             git pull --rebase && git push && break || sleep $((i * 3))
           done
 
-  # ===== 频道对 3（新增：3927512608 → @my1xroll，替换链接）=====
+  # ===== 频道对 3（新增：3927512608 → @xrollofficial，替换链接）=====
   forward-3:
     runs-on: ubuntu-latest
     permissions:
@@ -97,7 +97,7 @@ jobs:
           API_HASH: ${{ secrets.API_HASH }}
           TELETHON_SESSION: ${{ secrets.TELETHON_SESSION }}
           SOURCE_CHANNEL: ${{ secrets.SOURCE_CHANNEL_3 }}
-          TARGET_CHANNEL: ${{ secrets.TARGET_CHANNEL_3 }}
+          TARGET_CHANNEL: "@xrollofficial"
           CUSTOM_URL: ${{ secrets.CUSTOM_URL_3 }}
           REPLACE_LINKS: "1"
           MENTION_HANDLE: "@xrollofficial"
