@@ -1,5 +1,6 @@
 import asyncio
 import os
+import re
 from collections import defaultdict
 from telethon import TelegramClient
 from telethon.errors import MediaEmptyError
@@ -10,9 +11,18 @@ API_HASH = os.environ["API_HASH"]
 SESSION = os.environ["TELETHON_SESSION"]
 SOURCE_CHANNEL = os.environ["SOURCE_CHANNEL"]   # 源频道 ID，如 -1001234567890
 TARGET_CHANNEL = os.environ["TARGET_CHANNEL"]   # 你的频道 ID 或 @username
-CUSTOM_URL = os.environ["CUSTOM_URL"]           # 你要附加的链接
+CUSTOM_URL = os.environ["CUSTOM_URL"]           # 你的链接（追加 / 替换用）
+
+# REPLACE_LINKS=1 时：把原文里的链接(http/https、t.me)替换成 CUSTOM_URL，
+# 并把 @用户名 提及替换成你的频道用户名；否则只在末尾追加 CUSTOM_URL（旧行为）。
+REPLACE_LINKS = os.environ.get("REPLACE_LINKS", "0") == "1"
+# 目标频道若是 @用户名，则用它替换原文的 @提及
+TARGET_HANDLE = TARGET_CHANNEL if TARGET_CHANNEL.startswith("@") else ""
 
 LAST_ID_FILE = os.environ.get("LAST_ID_FILE", "last_message_id.txt")
+
+URL_RE = re.compile(r'(?:https?://|www\.|t\.me/|telegram\.me/)\S+', re.IGNORECASE)
+MENTION_RE = re.compile(r'@[A-Za-z][A-Za-z0-9_]{3,31}')
 
 
 def read_last_id():
@@ -28,6 +38,19 @@ def write_last_id(msg_id: int):
 
 
 def with_url(text: str) -> str:
+    text = text or ""
+    if REPLACE_LINKS:
+        had_link = bool(URL_RE.search(text))
+        # 把原文里的链接换成你的链接
+        text = URL_RE.sub(CUSTOM_URL, text)
+        # 把 @别人的频道 换成你的频道用户名
+        if TARGET_HANDLE:
+            text = MENTION_RE.sub(TARGET_HANDLE, text)
+        # 原文没有任何链接时，仍在末尾补上你的链接
+        if not had_link:
+            text = f"{text}\n\n{CUSTOM_URL}" if text else CUSTOM_URL
+        return text
+    # 旧行为：仅在末尾追加
     return f"{text}\n\n{CUSTOM_URL}" if text else CUSTOM_URL
 
 
