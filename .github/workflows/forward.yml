@@ -100,6 +100,7 @@ jobs:
           TARGET_CHANNEL: ${{ secrets.TARGET_CHANNEL_3 }}
           CUSTOM_URL: ${{ secrets.CUSTOM_URL_3 }}
           REPLACE_LINKS: "1"
+          MENTION_HANDLE: "@xrollofficial"
           LAST_ID_FILE: last_id_3.txt
         run: python forward_bot.py
       - name: 保存进度

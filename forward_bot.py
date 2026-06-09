@@ -16,8 +16,9 @@ CUSTOM_URL = os.environ["CUSTOM_URL"]           # 你的链接（追加 / 替换
 # REPLACE_LINKS=1 时：把原文里的链接(http/https、t.me)替换成 CUSTOM_URL，
 # 并把 @用户名 提及替换成你的频道用户名；否则只在末尾追加 CUSTOM_URL（旧行为）。
 REPLACE_LINKS = os.environ.get("REPLACE_LINKS", "0") == "1"
-# 目标频道若是 @用户名，则用它替换原文的 @提及
-TARGET_HANDLE = TARGET_CHANNEL if TARGET_CHANNEL.startswith("@") else ""
+# 用于替换原文 @提及 的频道用户名（用 MENTION_HANDLE 指定，例如你的主频道 @xrollofficial；
+# 未设置时回退到目标频道的 @用户名）
+MENTION_HANDLE = os.environ.get("MENTION_HANDLE", "").strip() or (TARGET_CHANNEL if TARGET_CHANNEL.startswith("@") else "")
 
 LAST_ID_FILE = os.environ.get("LAST_ID_FILE", "last_message_id.txt")
 
@@ -44,8 +45,8 @@ def with_url(text: str) -> str:
         # 把原文里的链接换成你的链接
         text = URL_RE.sub(CUSTOM_URL, text)
         # 把 @别人的频道 换成你的频道用户名
-        if TARGET_HANDLE:
-            text = MENTION_RE.sub(TARGET_HANDLE, text)
+        if MENTION_HANDLE:
+            text = MENTION_RE.sub(MENTION_HANDLE, text)
         # 原文没有任何链接时，仍在末尾补上你的链接
         if not had_link:
             text = f"{text}\n\n{CUSTOM_URL}" if text else CUSTOM_URL
