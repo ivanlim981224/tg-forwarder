@@ -5,6 +5,7 @@ from collections import defaultdict
 from telethon import TelegramClient
 from telethon.errors import MediaEmptyError
 from telethon.sessions import StringSession
+from telethon.tl.types import MessageMediaWebPage
 
 API_ID = int(os.environ["API_ID"])
 API_HASH = os.environ["API_HASH"]
@@ -69,30 +70,40 @@ async def send_messages(client, target, messages: list):
     # 单条消息
     for msg in singles:
         content = with_url(msg.message or "")
-        if msg.media:
-            try:
-                await client.send_file(target, msg.media, caption=content)
-            except MediaEmptyError:
-                print(f"跳过受保护媒体（消息 ID {msg.id}），仅发送文字。")
-                if msg.message:
+        try:
+            # 网页链接预览(MessageMediaWebPage)不是真文件，当文字发；真媒体才 send_file
+            if msg.media and not isinstance(msg.media, MessageMediaWebPage):
+                try:
+                    await client.send_file(target, msg.media, caption=content)
+                except (MediaEmptyError, TypeError) as e:
+                    print(f"消息 {msg.id} 媒体无法发送（{type(e).__name__}），改发文字。")
                     await client.send_message(target, content)
-        elif msg.message:
-            await client.send_message(target, content)
+            else:
+                await client.send_message(target, content)
+        except Exception as e:
+            # 单条消息出错不应中断整批转发（否则进度不保存、下一轮死循环重试）
+            print(f"跳过消息 {msg.id}: {type(e).__name__}: {e}")
         await asyncio.sleep(1.5)
 
     # 相册（多图/多视频）
     for group_msgs in albums.values():
-        group_msgs.sort(key=lambda m: m.id)
-        files = [m.media for m in group_msgs if m.media]
-        text_msg = next((m for m in reversed(group_msgs) if m.message), None)
-        caption = with_url(text_msg.message if text_msg else "")
-        if files:
-            try:
-                await client.send_file(target, files, caption=caption)
-            except MediaEmptyError:
-                print(f"跳过受保护相册，仅发送文字。")
-                if caption:
-                    await client.send_message(target, caption)
+        try:
+            group_msgs.sort(key=lambda m: m.id)
+            files = [m.media for m in group_msgs
+                     if m.media and not isinstance(m.media, MessageMediaWebPage)]
+            text_msg = next((m for m in reversed(group_msgs) if m.message), None)
+            caption = with_url(text_msg.message if text_msg else "")
+            if files:
+                try:
+                    await client.send_file(target, files, caption=caption)
+                except (MediaEmptyError, TypeError) as e:
+                    print(f"相册媒体无法发送（{type(e).__name__}），改发文字。")
+                    if caption:
+                        await client.send_message(target, caption)
+            elif caption:
+                await client.send_message(target, caption)
+        except Exception as e:
+            print(f"跳过相册: {type(e).__name__}: {e}")
         await asyncio.sleep(1.5)
 
 
